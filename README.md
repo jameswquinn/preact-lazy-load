@@ -1,202 +1,310 @@
-Creating comprehensive documentation for your npm package and GitHub repository is essential for helping users understand how to use your library and contribute to it. Below are the steps and examples for documenting your npm package and GitHub repository.
+To extract the code into an npm library that can be easily implemented in a new Preact app, you will need to structure your code as a reusable package. Here’s a step-by-step guide to creating an npm package for lazy loading in Preact:
 
-### Documentation for npm Package
+### Step-by-Step Guide
 
-#### 1. `README.md` for GitHub and npm
+#### 1. Set Up the NPM Package
 
-Create a `README.md` file in the root directory of your npm package. This file will serve as the main documentation for both GitHub and npm.
+1. **Create a new directory for your library:**
+    ```sh
+    mkdir preact-lazy-load
+    cd preact-lazy-load
+    ```
 
-```markdown
-# Preact Lazy Load
+2. **Initialize the npm package:**
+    ```sh
+    npm init -y
+    ```
 
-`preact-lazy-load` is a lightweight library for implementing lazy loading in Preact applications. It includes components for lazy loading images, iframes, and background images, with fallback support for older browsers.
+3. **Install Preact as a dependency:**
+    ```sh
+    npm install preact
+    ```
 
-## Installation
+4. **Create the required directory structure:**
+    ```sh
+    mkdir src
+    touch src/index.js src/LazyImage.js src/LazyIframe.js src/LazyBackgroundImage.js
+    ```
 
-You can install the library via npm:
+#### 2. Write the Library Code
 
-```sh
-npm install preact-lazy-load
+##### `src/index.js`
+This file will export all the components.
+```jsx
+export { default as LazyImage } from './LazyImage';
+export { default as LazyIframe } from './LazyIframe';
+export { default as LazyBackgroundImage } from './LazyBackgroundImage';
 ```
 
-## Usage
-
-Here’s how to use the components in your Preact application:
-
-### LazyImage
-
-A component for lazy loading images.
-
+##### `src/LazyImage.js`
 ```jsx
 import { h } from 'preact';
-import { LazyImage } from 'preact-lazy-load';
+import { useRef, useEffect } from 'preact/hooks';
 
-const MyComponent = () => (
-  <LazyImage
-    src="path/to/image.jpg"
-    srcset="path/to/image-320w.jpg 320w, path/to/image-480w.jpg 480w"
-    sizes="(max-width: 600px) 320px, 480px"
-    alt="Description of image"
-  />
-);
+const LazyImage = ({ src, srcset, sizes, alt }) => {
+  const imgRef = useRef(null);
+
+  useEffect(() => {
+    if ('loading' in HTMLImageElement.prototype) {
+      imgRef.current.src = src;
+      imgRef.current.srcset = srcset;
+    } else {
+      setupLazyLoadingFallback();
+    }
+
+    function setupLazyLoadingFallback() {
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries, observer) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              imgRef.current.src = src;
+              imgRef.current.srcset = srcset;
+              observer.unobserve(imgRef.current);
+            }
+          });
+        }, { rootMargin: '0px 0px 50px 0px' });
+        observer.observe(imgRef.current);
+      } else {
+        imgRef.current.src = src;
+        imgRef.current.srcset = srcset;
+      }
+    }
+  }, [src, srcset]);
+
+  return (
+    <img
+      ref={imgRef}
+      sizes={sizes}
+      loading="lazy"
+      alt={alt}
+    />
+  );
+};
+
+export default LazyImage;
 ```
 
-### LazyIframe
-
-A component for lazy loading iframes.
-
+##### `src/LazyIframe.js`
 ```jsx
 import { h } from 'preact';
-import { LazyIframe } from 'preact-lazy-load';
+import { useRef, useEffect } from 'preact/hooks';
 
-const MyComponent = () => (
-  <LazyIframe
-    src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-    title="Sample Video"
-  />
-);
+const LazyIframe = ({ src, title }) => {
+  const iframeRef = useRef(null);
+
+  useEffect(() => {
+    if ('loading' in HTMLIFrameElement.prototype) {
+      iframeRef.current.src = src;
+    } else {
+      setupLazyLoadingFallback();
+    }
+
+    function setupLazyLoadingFallback() {
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries, observer) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              iframeRef.current.src = src;
+              observer.unobserve(iframeRef.current);
+            }
+          });
+        }, { rootMargin: '0px 0px 50px 0px' });
+        observer.observe(iframeRef.current);
+      } else {
+        iframeRef.current.src = src;
+      }
+    }
+  }, [src]);
+
+  return (
+    <iframe
+      ref={iframeRef}
+      loading="lazy"
+      title={title}
+    ></iframe>
+  );
+};
+
+export default LazyIframe;
 ```
 
-### LazyBackgroundImage
-
-A component for lazy loading background images.
-
+##### `src/LazyBackgroundImage.js`
 ```jsx
 import { h } from 'preact';
-import { LazyBackgroundImage } from 'preact-lazy-load';
+import { useRef, useEffect } from 'preact/hooks';
 
-const MyComponent = () => (
-  <LazyBackgroundImage src="path/to/background-image.jpg">
-    <p>Content overlaying the background image</p>
-  </LazyBackgroundImage>
-);
+const LazyBackgroundImage = ({ src, children }) => {
+  const divRef = useRef(null);
+
+  useEffect(() => {
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            divRef.current.style.backgroundImage = `url(${src})`;
+            divRef.current.setAttribute('data-loaded', 'true');
+            observer.disconnect();
+          }
+        });
+      }, { rootMargin: '0px 0px 50px 0px' });
+      observer.observe(divRef.current);
+    } else {
+      // Fallback for older browsers
+      divRef.current.style.backgroundImage = `url(${src})`;
+      divRef.current.setAttribute('data-loaded', 'true');
+    }
+  }, [src]);
+
+  return (
+    <div ref={divRef} className="lazy-background">
+      {children}
+    </div>
+  );
+};
+
+export default LazyBackgroundImage;
 ```
 
-## Development
+#### 3. Add Styles
 
-To build the library:
+Since styles need to be included for the library to work correctly, create a `style.css` file and include it in the package. 
 
-```sh
-npm run build
-```
+Create `src/style.css`:
+```css
+.lazy-background {
+  opacity: 0;
+  transition: opacity 0.3s;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
 
-## Contributing
-
-1. Fork the repository.
-2. Create a feature branch.
-3. Commit your changes.
-4. Push to the branch.
-5. Create a pull request.
-
-## License
-
-MIT License. See `LICENSE` for more information.
-```
-
-#### 2. `package.json` Scripts and Metadata
-
-Ensure your `package.json` includes relevant metadata for npm. This is crucial for npm’s package registry and for users who install your package.
-
-```json
-{
-  "name": "preact-lazy-load",
-  "version": "1.0.0",
-  "description": "A library for lazy loading images, iframes, and background images in Preact applications.",
-  "main": "dist/index.js",
-  "scripts": {
-    "build": "rollup -c"
-  },
-  "keywords": [
-    "preact",
-    "lazy-loading",
-    "images",
-    "iframe",
-    "background-image"
-  ],
-  "author": "Your Name",
-  "license": "MIT",
-  "peerDependencies": {
-    "preact": "^10.0.0"
-  },
-  "devDependencies": {
-    "preact": "^10.0.0",
-    "rollup": "^2.0.0",
-    "@rollup/plugin-node-resolve": "^13.0.0",
-    "@rollup/plugin-commonjs": "^21.0.0",
-    "@rollup/plugin-babel": "^5.0.0",
-    "@rollup/plugin-terser": "^7.0.0",
-    "babel-preset-react": "^7.0.0"
-  }
+.lazy-background[data-loaded] {
+  opacity: 1;
 }
 ```
 
-### Documentation for GitHub Repository
+Modify `src/index.js` to include the styles:
+```jsx
+import './style.css';
 
-#### 1. Create a GitHub Repository
+export { default as LazyImage } from './LazyImage';
+export { default as LazyIframe } from './LazyIframe';
+export { default as LazyBackgroundImage } from './LazyBackgroundImage';
+```
 
-1. **Create a repository on GitHub:** Go to [GitHub](https://github.com/) and create a new repository.
-2. **Push your code to GitHub:**
+#### 4. Bundle the Library
+
+You will need to set up a bundler like Rollup to bundle your library. Here is an example configuration using Rollup.
+
+1. **Install Rollup and necessary plugins:**
     ```sh
-    git init
-    git add .
-    git commit -m "Initial commit"
-    git branch -M main
-    git remote add origin https://github.com/username/preact-lazy-load.git
-    git push -u origin main
+    npm install --save-dev rollup @rollup/plugin-node-resolve @rollup/plugin-commonjs @rollup/plugin-babel @rollup/plugin-terser
     ```
 
-#### 2. GitHub Repository Structure
+2. **Create `rollup.config.js`:**
+    ```js
+    import resolve from '@rollup/plugin-node-resolve';
+    import commonjs from '@rollup/plugin-commonjs';
+    import babel from '@rollup/plugin-babel';
+    import { terser } from '@rollup/plugin-terser';
 
-Ensure your GitHub repository has the following structure:
+    export default {
+      input: 'src/index.js',
+      output: {
+        file: 'dist/index.js',
+        format: 'esm',
+        sourcemap: true,
+      },
+      plugins: [
+        resolve(),
+        commonjs(),
+        babel({
+          exclude: 'node_modules/**',
+          presets: ['@babel/preset-env', '@babel/preset-react']
+        }),
+        terser(),
+      ],
+      external: ['preact']
+    };
+    ```
 
+3. **Add build scripts to `package.json`:**
+    ```json
+    "scripts": {
+      "build": "rollup -c"
+    },
+    ```
+
+#### 5. Build and Publish the Library
+
+1. **Build the library:**
+    ```sh
+    npm run build
+    ```
+
+2. **Publish the package:**
+    ```sh
+    npm publish
+    ```
+
+#### 6. Use the Library in a New Preact App
+
+1. **Create a new Preact app:**
+    ```sh
+    npx preact-cli create default my-new-preact-app
+    cd my-new-preact-app
+    ```
+
+2. **Install the library:**
+    ```sh
+    npm install preact-lazy-load
+    ```
+
+3. **Use the library in your Preact app:**
+
+##### `src/index.js`
+```jsx
+import { h, render } from 'preact';
+import App from './components/App';
+import './style.css';
+
+render(<App />, document.body);
 ```
-preact-lazy-load/
-├── dist/                   # Bundled output directory
-├── src/                    # Source code directory
-│   ├── index.js
-│   ├── LazyImage.js
-│   ├── LazyIframe.js
-│   └── LazyBackgroundImage.js
-├── .gitignore
-├── LICENSE                 # License file
-├── README.md               # Documentation file
-├── package.json            # npm package metadata
-└── rollup.config.js        # Rollup configuration
+
+##### `src/components/App.js`
+```jsx
+import { h } from 'preact';
+import { LazyImage, LazyIframe, LazyBackgroundImage } from 'preact-lazy-load';
+
+const App = () => (
+  <div>
+    <h1>Native Lazy Loading in Preact</h1>
+    
+    <h2>Lazy Load Image</h2>
+    <LazyImage 
+      src="path/to/image.jpg" 
+      srcset="path/to/image-320w.jpg 320w, path/to/image-480w.jpg 480w" 
+      sizes="(max-width: 600px) 320px, 480px" 
+      alt="Description of image"
+    />
+    
+    <h2>Lazy Load Iframe</h2>
+    <LazyIframe 
+      src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+      title="Sample Video"
+    />
+    
+    <h2>Lazy Load Background Image</h2>
+    <LazyBackgroundImage 
+      src="path/to/background-image.jpg"
+    >
+      <p>Content overlaying the background image</p>
+    </LazyBackgroundImage>
+  </div>
+);
+
+export default App;
 ```
 
-#### 3. Adding a License
-
-Create a `LICENSE` file to specify the license under which your code is distributed. For example, for the MIT License:
-
-```plaintext
-MIT License
-
-Copyright (c) [year] [Your Name]
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
-
-### Final Checklist
-
-- **README.md:** Comprehensive and clear documentation with usage examples, installation instructions, and contribution guidelines.
-- **LICENSE:** Appropriate license for your project.
-- **package.json:** Includes metadata, dependencies, and build scripts.
-- **GitHub Repository:** Properly structured and includes all necessary files for users to get started.
-
-With these steps, you’ll have a well-documented npm package and GitHub repository, making it easy for users to integrate and contribute to your Preact lazy loading library.
+With this setup, you have created an npm library for lazy loading components in Preact that can be easily integrated into any Preact project.
