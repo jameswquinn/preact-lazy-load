@@ -204,36 +204,36 @@ You will need to set up a bundler like Rollup to bundle your library. Here is an
 
 2. **Create `rollup.config.mjs`:**
     ```js
-import babel from "@rollup/plugin-babel";
-import terser from "@rollup/plugin-terser";
-import postcss from "rollup-plugin-postcss";
-
-export default {
-  input: "src/index.js",
-  output: {
-    file: "dist/bundle.js",
-    format: "esm",
-  },
-  plugins: [
-    postcss({
-      extract: true,
-      minimize: true,
-      extensions: [".css"],
-    }),
-    babel({
-      babelHelpers: "bundled",
-      presets: ["@babel/preset-env"],
+    import babel from "@rollup/plugin-babel";
+    import terser from "@rollup/plugin-terser";
+    import postcss from "rollup-plugin-postcss";
+    
+    export default {
+      input: "src/index.js",
+      output: {
+        file: "dist/bundle.js",
+        format: "esm",
+      },
       plugins: [
-        [
-          "@babel/plugin-transform-react-jsx",
-          { pragma: "h", pragmaFrag: "Fragment" },
-        ],
+        postcss({
+          extract: true,
+          minimize: true,
+          extensions: [".css"],
+        }),
+        babel({
+          babelHelpers: "bundled",
+          presets: ["@babel/preset-env"],
+          plugins: [
+            [
+              "@babel/plugin-transform-react-jsx",
+              { pragma: "h", pragmaFrag: "Fragment" },
+            ],
+          ],
+          extensions: [".js", ".jsx"],
+        }),
+        terser(),
       ],
-      extensions: [".js", ".jsx"],
-    }),
-    terser(),
-  ],
-};
+    };
     ```
 
 3. **Add build scripts to `package.json`:**
