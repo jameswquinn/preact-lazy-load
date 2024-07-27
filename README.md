@@ -243,6 +243,11 @@ You will need to set up a bundler like Rollup to bundle your library. Here is an
     },
     ```
 
+4. **Add .babelrc :**
+   ```.babelrc
+   ```
+       
+
 #### 5. Build and Publish the Library
 
 1. **Build the library:**
