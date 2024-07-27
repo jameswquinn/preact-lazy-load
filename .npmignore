@@ -1,0 +1,7 @@
+src
+webpack.config.js
+.babelrc
+.gitignore
+.npmignore
+package.json
+README.md
