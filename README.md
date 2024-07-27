@@ -202,7 +202,7 @@ You will need to set up a bundler like Rollup to bundle your library. Here is an
     npm install --save-dev rollup @rollup/plugin-node-resolve @rollup/plugin-commonjs @rollup/plugin-babel @rollup/plugin-terser
     ```
 
-2. **Create `rollup.config.js`:**
+2. **Create `rollup.config.mjs`:**
     ```js
     import resolve from '@rollup/plugin-node-resolve';
     import commonjs from '@rollup/plugin-commonjs';
