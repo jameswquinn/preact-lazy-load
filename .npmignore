@@ -1,5 +1,5 @@
 src
-webpack.config.js
+rollup.config.mjs
 .babelrc
 .gitignore
 .npmignore
