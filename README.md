@@ -245,6 +245,15 @@ You will need to set up a bundler like Rollup to bundle your library. Here is an
 
 4. **Add .babelrc :**
    ```.babelrc
+       {
+      "presets": ["@babel/preset-env"],
+      "plugins": [
+        [
+          "@babel/plugin-transform-react-jsx",
+          { "runtime": "automatic", "importSource": "preact" }
+        ]
+      ]
+}
    ```
        
 
