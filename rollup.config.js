@@ -5,19 +5,22 @@ import { terser } from '@rollup/plugin-terser';
 
 export default {
   input: 'src/index.js',
-  output: {
-    file: 'dist/index.js',
-    format: 'esm',
-    sourcemap: true,
-  },
+  output: [
+    {
+      file: 'dist/index.js',
+      format: 'esm',
+      sourcemap: true
+    },
+    {
+      file: 'dist/index.cjs.js',
+      format: 'cjs',
+      sourcemap: true
+    }
+  ],
   plugins: [
     resolve(),
     commonjs(),
-    babel({
-      exclude: 'node_modules/**',
-      presets: ['@babel/preset-env', '@babel/preset-react']
-    }),
-    terser(),
-  ],
-  external: ['preact']
+    babel({ babelHelpers: 'bundled' }),
+    terser()
+  ]
 };
