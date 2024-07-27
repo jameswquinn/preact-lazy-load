@@ -204,29 +204,36 @@ You will need to set up a bundler like Rollup to bundle your library. Here is an
 
 2. **Create `rollup.config.mjs`:**
     ```js
-    import resolve from '@rollup/plugin-node-resolve';
-    import commonjs from '@rollup/plugin-commonjs';
-    import babel from '@rollup/plugin-babel';
-    import { terser } from '@rollup/plugin-terser';
+import babel from "@rollup/plugin-babel";
+import terser from "@rollup/plugin-terser";
+import postcss from "rollup-plugin-postcss";
 
-    export default {
-      input: 'src/index.js',
-      output: {
-        file: 'dist/index.js',
-        format: 'esm',
-        sourcemap: true,
-      },
+export default {
+  input: "src/index.js",
+  output: {
+    file: "dist/bundle.js",
+    format: "esm",
+  },
+  plugins: [
+    postcss({
+      extract: true,
+      minimize: true,
+      extensions: [".css"],
+    }),
+    babel({
+      babelHelpers: "bundled",
+      presets: ["@babel/preset-env"],
       plugins: [
-        resolve(),
-        commonjs(),
-        babel({
-          exclude: 'node_modules/**',
-          presets: ['@babel/preset-env', '@babel/preset-react']
-        }),
-        terser(),
+        [
+          "@babel/plugin-transform-react-jsx",
+          { pragma: "h", pragmaFrag: "Fragment" },
+        ],
       ],
-      external: ['preact']
-    };
+      extensions: [".js", ".jsx"],
+    }),
+    terser(),
+  ],
+};
     ```
 
 3. **Add build scripts to `package.json`:**
