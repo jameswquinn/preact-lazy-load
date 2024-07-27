@@ -2,7 +2,7 @@
   "name": "preact-lazy-load",
   "version": "1.0.0",
   "description": "`preact-lazy-load` is a lightweight library for implementing lazy loading in Preact applications. It includes components for lazy loading images, iframes, and background images, with fallback support for older browsers.",
-  "main": "dist/index.js",
+  "main": "src/index.js",
   "type": "module",
   "scripts": {
     "build": "rollup -c",
@@ -24,11 +24,16 @@
   },
   "homepage": "https://github.com/jameswquinn/preact-lazy-load#readme",
   "devDependencies": {
+    "@babel/core": "^7.24.9",
+    "@babel/plugin-transform-react-jsx": "^7.24.7",
+    "@babel/preset-env": "^7.25.0",
+    "@babel/preset-react": "^7.24.7",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
-    "rollup": "^4.19.1"
+    "rollup": "^4.19.1",
+    "terser": "^5.31.3"
   },
   "dependencies": {
     "preact": "^10.23.1"
