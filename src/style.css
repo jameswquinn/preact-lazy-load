@@ -1,0 +1,11 @@
+.lazy-background {
+  opacity: 0;
+  transition: opacity 0.3s;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.lazy-background[data-loaded] {
+  opacity: 1;
+}
