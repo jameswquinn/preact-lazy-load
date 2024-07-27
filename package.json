@@ -1,5 +1,5 @@
 {
-  "name": "preact-lazy-load",
+  "name": "@jameswilliamquinn2018/preact-lazy-load",
   "version": "1.0.0",
   "description": "`preact-lazy-load` is a lightweight library for implementing lazy loading in Preact applications. It includes components for lazy loading images, iframes, and background images, with fallback support for older browsers.",
   "main": "src/index.js",
