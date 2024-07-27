@@ -253,7 +253,7 @@ You will need to set up a bundler like Rollup to bundle your library. Here is an
           { "runtime": "automatic", "importSource": "preact" }
         ]
       ]
-}
+    }
    ```
        
 
